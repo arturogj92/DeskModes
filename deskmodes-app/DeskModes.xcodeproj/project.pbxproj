@@ -10,6 +10,10 @@
 		DM001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM002 /* AppDelegate.swift */; };
 		DM122 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM123 /* main.swift */; };
 		DM100 /* AppIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM101 /* AppIdentifier.swift */; };
+		DMS001 /* ShortcutsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DMS002 /* ShortcutsViewController.swift */; };
+		DMS003 /* AdvancedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DMS004 /* AdvancedViewController.swift */; };
+		DMS005 /* ShortcutRecorderButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DMS006 /* ShortcutRecorderButton.swift */; };
+		DMH001 /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DMH002 /* GlobalHotkeyManager.swift */; };
 		DM102 /* Mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM103 /* Mode.swift */; };
 		DM104 /* GlobalAllowList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM105 /* GlobalAllowList.swift */; };
 		DM106 /* WindowLayoutEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM107 /* WindowLayoutEntry.swift */; };
@@ -58,6 +62,9 @@
 		DM307 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		DM309 /* ModesSidebarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModesSidebarController.swift; sourceTree = "<group>"; };
 		DM311 /* ModeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeDetailViewController.swift; sourceTree = "<group>"; };
+		DMS002 /* ShortcutsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsViewController.swift; sourceTree = "<group>"; };
+		DMS004 /* AdvancedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedViewController.swift; sourceTree = "<group>"; };
+		DMS006 /* ShortcutRecorderButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderButton.swift; sourceTree = "<group>"; };
 		DMT001 /* ToastWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastWindow.swift; sourceTree = "<group>"; };
 		DMT003 /* ModeSwitchHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeSwitchHUD.swift; sourceTree = "<group>"; };
 		DMT005 /* ModeSelectorOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeSelectorOverlay.swift; sourceTree = "<group>"; };
@@ -65,6 +72,7 @@
 		DMR004 /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon.png; sourceTree = "<group>"; };
 		DMR006 /* MenuBarIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MenuBarIcon.png; sourceTree = "<group>"; };
 		DMR008 /* ModeIcons */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ModeIcons; sourceTree = "<group>"; };
+		DMH002 /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,10 +178,19 @@
 			isa = PBXGroup;
 			children = (
 				DM221 /* Adapters */,
+				DMH000 /* Hotkeys */,
 				DM223 /* Persistence */,
 				DM222 /* Utilities */,
 			);
 			path = Infrastructure;
+			sourceTree = "<group>";
+		};
+		DMH000 /* Hotkeys */ = {
+			isa = PBXGroup;
+			children = (
+				DMH002 /* GlobalHotkeyManager.swift */,
+			);
+			path = Hotkeys;
 			sourceTree = "<group>";
 		};
 		DM223 /* Persistence */ = {
@@ -223,10 +240,13 @@
 		DM232 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				DMS004 /* AdvancedViewController.swift */,
 				DM311 /* ModeDetailViewController.swift */,
 				DM309 /* ModesSidebarController.swift */,
 				DM307 /* SettingsViewController.swift */,
 				DM305 /* SettingsWindowController.swift */,
+				DMS006 /* ShortcutRecorderButton.swift */,
+				DMS002 /* ShortcutsViewController.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -332,9 +352,13 @@
 				DM306 /* SettingsViewController.swift in Sources */,
 				DM308 /* ModesSidebarController.swift in Sources */,
 				DM310 /* ModeDetailViewController.swift in Sources */,
+				DMS001 /* ShortcutsViewController.swift in Sources */,
+				DMS003 /* AdvancedViewController.swift in Sources */,
+				DMS005 /* ShortcutRecorderButton.swift in Sources */,
 				DMT002 /* ToastWindow.swift in Sources */,
 				DMT004 /* ModeSwitchHUD.swift in Sources */,
 				DMT006 /* ModeSelectorOverlay.swift in Sources */,
+				DMH001 /* GlobalHotkeyManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

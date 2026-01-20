@@ -73,8 +73,9 @@ final class ModeSwitchUseCase: ModeSwitching {
                 continue
             }
 
-            // App should be closed
-            let result = appCloser.closeApp(app)
+            // App should be closed (respect force close setting)
+            let forceClose = ConfigStore.shared.config.forceCloseApps
+            let result = appCloser.closeApp(app, forceClose: forceClose)
             switch result {
             case .closed:
                 closedApps.append(app)

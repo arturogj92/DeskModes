@@ -20,8 +20,6 @@ final class ModeDetailViewController: NSViewController {
     // Header (for modes)
     private let iconButton = NSButton()
     private let nameField = NSTextField()
-    private let shortcutLabel = NSTextField(labelWithString: "Shortcut:")
-    private let shortcutButton = NSButton()
 
     // Global header (for global section)
     private let globalHeaderView = NSView()
@@ -280,9 +278,6 @@ final class ModeDetailViewController: NSViewController {
         nameField.isHidden = false
         nameField.stringValue = mode.name
         nameField.isEditable = true
-        shortcutLabel.isHidden = false
-        shortcutButton.isHidden = false
-        shortcutButton.title = mode.shortcut ?? "None"
         appsLabel.isHidden = false
         appsHelpLabel.isHidden = false
 
@@ -361,8 +356,6 @@ final class ModeDetailViewController: NSViewController {
         globalHeaderView.isHidden = false
         iconButton.isHidden = true
         nameField.isHidden = true
-        shortcutLabel.isHidden = true
-        shortcutButton.isHidden = true
         appsLabel.isHidden = true
         appsHelpLabel.isHidden = true
         appsWarningLabel.isHidden = true
@@ -413,18 +406,6 @@ final class ModeDetailViewController: NSViewController {
         nameField.delegate = self
         nameField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nameField)
-
-        // Shortcut
-        shortcutLabel.font = NSFont.systemFont(ofSize: 13)
-        shortcutLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(shortcutLabel)
-
-        shortcutButton.title = "None"
-        shortcutButton.bezelStyle = .rounded
-        shortcutButton.target = self
-        shortcutButton.action = #selector(shortcutClicked)
-        shortcutButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(shortcutButton)
 
         // Global header (hidden by default, shown only for Global section)
         setupGlobalHeader()
@@ -610,18 +591,12 @@ final class ModeDetailViewController: NSViewController {
 
             // Add app button
             addAppButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            addAppButton.bottomAnchor.constraint(equalTo: shortcutLabel.topAnchor, constant: -16),
+            addAppButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding),
 
             // Add running apps button (next to add app button)
             addRunningAppsButton.leadingAnchor.constraint(equalTo: addAppButton.trailingAnchor, constant: 8),
             addRunningAppsButton.centerYAnchor.constraint(equalTo: addAppButton.centerYAnchor),
 
-            // Shortcut (REORDERED: now at bottom, secondary information)
-            shortcutLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            shortcutLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding),
-
-            shortcutButton.centerYAnchor.constraint(equalTo: shortcutLabel.centerYAnchor),
-            shortcutButton.leadingAnchor.constraint(equalTo: shortcutLabel.trailingAnchor, constant: 8)
         ])
 
         // Dynamic constraints for scrollView top (switch between mode and global views)
@@ -655,14 +630,6 @@ final class ModeDetailViewController: NSViewController {
         iconButton.identifier = NSUserInterfaceItemIdentifier(iconName)
     }
 
-    @objc private func shortcutClicked() {
-        let alert = NSAlert()
-        alert.messageText = "Shortcuts Coming Soon"
-        alert.informativeText = "Keyboard shortcut recording will be available in a future update."
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "OK")
-        alert.runModal()
-    }
 
     @objc private func addAppClicked() {
         showAppPicker(relativeTo: addAppButton) { [weak self] app in

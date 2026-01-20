@@ -11,7 +11,7 @@ enum AppCloseResult {
 
 /// Protocol for closing applications (for testability)
 protocol AppClosing {
-    func closeApp(_ app: AppIdentifier) -> AppCloseResult
+    func closeApp(_ app: AppIdentifier, forceClose: Bool) -> AppCloseResult
 }
 
 /// Infrastructure adapter that safely closes applications.
@@ -20,11 +20,11 @@ final class AppCloser: AppClosing {
 
     private let logger = Logger.shared
 
-    /// Attempts to safely close an application.
-    /// Uses terminate() which is equivalent to Cmd+Q.
-    /// If the app has unsaved changes, it will show a dialog and may refuse to quit.
-    func closeApp(_ app: AppIdentifier) -> AppCloseResult {
-        logger.info("Attempting to close: \(app.displayName)")
+    /// Attempts to close an application.
+    /// Uses terminate() which is equivalent to Cmd+Q (safe quit).
+    /// If forceClose is true, uses forceTerminate() which kills the app immediately.
+    func closeApp(_ app: AppIdentifier, forceClose: Bool = false) -> AppCloseResult {
+        logger.info("Attempting to close: \(app.displayName) (force: \(forceClose))")
 
         // Find the running application by bundle ID
         let runningApps = NSWorkspace.shared.runningApplications
@@ -33,10 +33,14 @@ final class AppCloser: AppClosing {
             return .notRunning
         }
 
-        // Attempt safe quit using terminate()
-        // terminate() sends a quit event - respects unsaved changes
-        // The app may show a save dialog and refuse to quit
-        let terminated = runningApp.terminate()
+        let terminated: Bool
+        if forceClose {
+            // Force terminate - kills immediately, may lose unsaved data
+            terminated = runningApp.forceTerminate()
+        } else {
+            // Safe quit - respects unsaved changes, app may show dialog
+            terminated = runningApp.terminate()
+        }
 
         if terminated {
             logger.info("Closed app: \(app.displayName)")

@@ -5,7 +5,11 @@ final class ModesSidebarController: NSViewController {
 
     // MARK: - Callbacks
 
+    /// Called when a mode or special section is selected
+    /// Parameters: (mode, isGlobal, sectionType)
+    /// sectionType: nil for modes, "shortcuts" or "advanced" for settings sections
     var onModeSelected: ((ModeConfig?, Bool) -> Void)?
+    var onSettingsSelected: ((String) -> Void)?  // "shortcuts" or "advanced"
     var onModeAdded: (() -> Void)?
 
     // MARK: - Properties
@@ -407,11 +411,24 @@ final class ModesSidebarController: NSViewController {
     // MARK: - Helper
 
     private func isSeparatorRow(_ row: Int) -> Bool {
-        return row == 1
+        // Separator after Global (row 1) and separator before Settings sections
+        return row == 1 || row == modes.count + 2
     }
 
     private func isGlobalRow(_ row: Int) -> Bool {
         return row == 0
+    }
+
+    private func isShortcutsRow(_ row: Int) -> Bool {
+        return row == modes.count + 3
+    }
+
+    private func isAdvancedRow(_ row: Int) -> Bool {
+        return row == modes.count + 4
+    }
+
+    private func isSettingsRow(_ row: Int) -> Bool {
+        return isShortcutsRow(row) || isAdvancedRow(row)
     }
 }
 
@@ -419,7 +436,8 @@ final class ModesSidebarController: NSViewController {
 
 extension ModesSidebarController: NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return modes.count + 2 // Global + separator + modes
+        // Global + separator + modes + separator + Shortcuts + Advanced
+        return modes.count + 5
     }
 }
 
@@ -491,6 +509,14 @@ extension ModesSidebarController: NSTableViewDelegate {
             } else {
                 cell?.imageView?.image = NSImage(systemSymbolName: "globe", accessibilityDescription: "Always Open")
             }
+        } else if isShortcutsRow(row) {
+            cell?.textField?.stringValue = "Shortcuts"
+            countLabel?.stringValue = ""
+            cell?.imageView?.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Shortcuts")
+        } else if isAdvancedRow(row) {
+            cell?.textField?.stringValue = "Advanced"
+            countLabel?.stringValue = ""
+            cell?.imageView?.image = NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: "Advanced")
         } else {
             let modeIndex = row - 2
             if modeIndex >= 0 && modeIndex < modes.count {
@@ -530,7 +556,8 @@ extension ModesSidebarController: NSTableViewDelegate {
         debugLog("tableViewSelectionDidChange: row=\(row), isRestoringSelection=\(isRestoringSelection)")
         guard row >= 0 else { return }
 
-        removeButton.isEnabled = row > 1 // Can't delete Global
+        // Can only delete modes (not Global, separators, or settings sections)
+        removeButton.isEnabled = row > 1 && row < modes.count + 2
 
         // Skip callback if we're just restoring selection after config change
         guard !isRestoringSelection else {
@@ -541,6 +568,12 @@ extension ModesSidebarController: NSTableViewDelegate {
         if isGlobalRow(row) {
             debugLog("tableViewSelectionDidChange: Calling onModeSelected with GLOBAL")
             onModeSelected?(nil, true)
+        } else if isShortcutsRow(row) {
+            debugLog("tableViewSelectionDidChange: Calling onSettingsSelected with 'shortcuts'")
+            onSettingsSelected?("shortcuts")
+        } else if isAdvancedRow(row) {
+            debugLog("tableViewSelectionDidChange: Calling onSettingsSelected with 'advanced'")
+            onSettingsSelected?("advanced")
         } else if !isSeparatorRow(row) {
             let modeIndex = row - 2
             if modeIndex >= 0 && modeIndex < modes.count {

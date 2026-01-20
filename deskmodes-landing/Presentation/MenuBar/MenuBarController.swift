@@ -32,11 +32,14 @@ final class MenuBarController {
         )
     }()
 
-    // Global hotkey monitors
+    // Global hotkey monitors (for modifier double-tap)
     private var globalMonitor: Any?
     private var localMonitor: Any?
     private var lastCommandPressTime: Date?
     private var lastOptionPressTime: Date?
+
+    // Auto-reapply timer
+    private var autoReapplyTimer: Timer?
 
     // MARK: - Initialization
 
@@ -44,6 +47,29 @@ final class MenuBarController {
         setupStatusItem()
         observeConfigChanges()
         setupGlobalHotkey()
+        setupAutoReapplyTimer()
+        setupCarbonHotkeys()
+        warmUpComponents()
+    }
+
+    /// Pre-initialize lazy components to avoid lag on first mode switch
+    private func warmUpComponents() {
+        // Touch modeSwitchUseCase to trigger lazy initialization
+        _ = modeSwitchUseCase
+        // Pre-load the system sound
+        _ = NSSound(named: "Purr")
+    }
+
+    private func setupCarbonHotkeys() {
+        // Setup callbacks for Carbon global hotkeys
+        GlobalHotkeyManager.shared.onModeSwitcherTriggered = { [weak self] in
+            self?.showModeSelector()
+        }
+        GlobalHotkeyManager.shared.onReapplyTriggered = { [weak self] in
+            self?.reapplyCurrentMode()
+        }
+        // Register current hotkeys
+        GlobalHotkeyManager.shared.updateHotkeys()
     }
 
     deinit {
@@ -53,6 +79,7 @@ final class MenuBarController {
         if let monitor = localMonitor {
             NSEvent.removeMonitor(monitor)
         }
+        autoReapplyTimer?.invalidate()
     }
 
     // MARK: - Setup
@@ -84,12 +111,44 @@ final class MenuBarController {
         )
     }
 
+    private func setupAutoReapplyTimer() {
+        // Invalidate existing timer
+        autoReapplyTimer?.invalidate()
+        autoReapplyTimer = nil
+
+        let config = ConfigStore.shared.config
+
+        // Only start timer if auto-reapply is enabled
+        guard config.enableAutoReapply else {
+            print("⏱️ Auto-reapply disabled")
+            return
+        }
+
+        let intervalSeconds = TimeInterval(config.autoReapplyInterval * 60)
+        print("⏱️ Auto-reapply enabled: every \(config.autoReapplyInterval) minutes")
+
+        autoReapplyTimer = Timer.scheduledTimer(withTimeInterval: intervalSeconds, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+
+            // Only auto-reapply if not paused and a mode is active
+            guard !self.isPaused, self.currentModeId != nil else {
+                print("⏱️ Auto-reapply skipped: paused=\(self.isPaused), currentModeId=\(self.currentModeId ?? "nil")")
+                return
+            }
+
+            print("⏱️ Auto-reapply triggered")
+            DispatchQueue.main.async {
+                self.reapplyCurrentMode()
+            }
+        }
+    }
+
     private func setupGlobalHotkey() {
-        // Double-tap Command key to open Preferences
-        // Double-tap Option key to open Mode Selector
+        // Double-tap modifier key to open Mode Selector
+        // Note: Custom shortcuts (like ⌘⇧0) are handled by Carbon in GlobalHotkeyManager
         let doubleTapInterval: TimeInterval = 0.3
 
-        // Monitor flags changed (for modifier keys like Command and Option)
+        // Monitor flags changed (for modifier double-tap detection)
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleModifierDoubleTap(event: event, interval: doubleTapInterval)
         }
@@ -99,7 +158,7 @@ final class MenuBarController {
             return event
         }
 
-        print("🔑 Global hotkey registered: Double-tap Command (Preferences), Double-tap Option (Mode Selector)")
+        print("🔑 Modifier double-tap monitors registered (Carbon handles custom shortcuts)")
     }
 
     private func logToFile(_ message: String) {
@@ -138,6 +197,9 @@ final class MenuBarController {
         }
     }
 
+    private var lastControlPressTime: Date?
+    private var lastShiftPressTime: Date?
+
     private func handleModifierDoubleTap(event: NSEvent, interval: TimeInterval) {
         // Detect Command key release (keyUp for modifier)
         // keyCode 55 = Left Command, 54 = Right Command
@@ -149,37 +211,84 @@ final class MenuBarController {
         let isOptionKey = event.keyCode == 58 || event.keyCode == 61
         let optionReleased = isOptionKey && !event.modifierFlags.contains(.option)
 
-        let now = Date()
+        // Detect Control key release
+        // keyCode 59 = Left Control, 62 = Right Control
+        let isControlKey = event.keyCode == 59 || event.keyCode == 62
+        let controlReleased = isControlKey && !event.modifierFlags.contains(.control)
 
-        // Handle Command double-tap (Preferences)
+        // Detect Shift key release
+        // keyCode 56 = Left Shift, 60 = Right Shift
+        let isShiftKey = event.keyCode == 56 || event.keyCode == 60
+        let shiftReleased = isShiftKey && !event.modifierFlags.contains(.shift)
+
+        let now = Date()
+        let modeSwitcherKey = ConfigStore.shared.config.modeSwitcherKey
+
+        // Handle Command double-tap
         if commandReleased {
             if let lastPress = lastCommandPressTime,
                now.timeIntervalSince(lastPress) < interval {
                 lastCommandPressTime = nil
-                DispatchQueue.main.async { [weak self] in
-                    self?.openPreferences()
+                if modeSwitcherKey == .command {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.showModeSelector()
+                    }
                 }
             } else {
                 lastCommandPressTime = now
             }
         }
 
-        // Handle Option double-tap (Mode Selector)
+        // Handle Option double-tap
         if optionReleased {
             if let lastPress = lastOptionPressTime,
                now.timeIntervalSince(lastPress) < interval {
                 lastOptionPressTime = nil
-                DispatchQueue.main.async { [weak self] in
-                    self?.showModeSelector()
+                if modeSwitcherKey == .option {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.showModeSelector()
+                    }
                 }
             } else {
                 lastOptionPressTime = now
+            }
+        }
+
+        // Handle Control double-tap
+        if controlReleased {
+            if let lastPress = lastControlPressTime,
+               now.timeIntervalSince(lastPress) < interval {
+                lastControlPressTime = nil
+                if modeSwitcherKey == .control {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.showModeSelector()
+                    }
+                }
+            } else {
+                lastControlPressTime = now
+            }
+        }
+
+        // Handle Shift double-tap
+        if shiftReleased {
+            if let lastPress = lastShiftPressTime,
+               now.timeIntervalSince(lastPress) < interval {
+                lastShiftPressTime = nil
+                if modeSwitcherKey == .shift {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.showModeSelector()
+                    }
+                }
+            } else {
+                lastShiftPressTime = now
             }
         }
     }
 
     @objc private func configDidChange() {
         rebuildMenu()
+        setupAutoReapplyTimer()  // Restart timer with new config
+        GlobalHotkeyManager.shared.updateHotkeys()  // Update Carbon hotkeys
     }
 
     private func rebuildMenu() {

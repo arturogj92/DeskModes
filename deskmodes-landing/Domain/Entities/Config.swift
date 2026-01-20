@@ -57,6 +57,37 @@ struct ModeConfig: Codable, Equatable, Identifiable {
     }
 }
 
+// MARK: - Mode Switcher Key
+
+/// Which modifier key to double-tap to open the mode switcher
+enum ModeSwitcherKey: String, Codable, CaseIterable {
+    case option = "option"
+    case command = "command"
+    case control = "control"
+    case shift = "shift"
+    case disabled = "disabled"
+
+    var displayName: String {
+        switch self {
+        case .option: return "Option + Option"
+        case .command: return "Command + Command"
+        case .control: return "Control + Control"
+        case .shift: return "Shift + Shift"
+        case .disabled: return "Disabled"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .option: return "⌥ + ⌥"
+        case .command: return "⌘ + ⌘"
+        case .control: return "⌃ + ⌃"
+        case .shift: return "⇧ + ⇧"
+        case .disabled: return "—"
+        }
+    }
+}
+
 // MARK: - App Config (Root)
 
 struct AppConfig: Codable, Equatable {
@@ -66,14 +97,56 @@ struct AppConfig: Codable, Equatable {
     var globalAllowList: [AppEntry]
     var modes: [ModeConfig]
 
+    // Settings
+    var enableReapplyShortcut: Bool
+    var forceCloseApps: Bool
+
+    // Auto-reapply
+    var enableAutoReapply: Bool
+    var autoReapplyInterval: Int  // Minutes
+
+    // Keyboard Shortcuts
+    var modeSwitcherKey: ModeSwitcherKey  // Double-tap option
+    var modeSwitcherShortcut: KeyboardShortcut?  // Custom shortcut (optional, in addition to double-tap)
+    var reapplyShortcut: KeyboardShortcut?
+
     init(
         version: Int = currentVersion,
         globalAllowList: [AppEntry] = [],
-        modes: [ModeConfig] = []
+        modes: [ModeConfig] = [],
+        enableReapplyShortcut: Bool = false,
+        forceCloseApps: Bool = false,
+        enableAutoReapply: Bool = false,
+        autoReapplyInterval: Int = 15,
+        modeSwitcherKey: ModeSwitcherKey = .option,
+        modeSwitcherShortcut: KeyboardShortcut? = nil,
+        reapplyShortcut: KeyboardShortcut? = .defaultReapply
     ) {
         self.version = version
         self.globalAllowList = globalAllowList
         self.modes = modes
+        self.enableReapplyShortcut = enableReapplyShortcut
+        self.forceCloseApps = forceCloseApps
+        self.enableAutoReapply = enableAutoReapply
+        self.autoReapplyInterval = autoReapplyInterval
+        self.modeSwitcherKey = modeSwitcherKey
+        self.modeSwitcherShortcut = modeSwitcherShortcut
+        self.reapplyShortcut = reapplyShortcut
+    }
+
+    // Custom decoding to handle missing keys for backwards compatibility
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decodeIfPresent(Int.self, forKey: .version) ?? AppConfig.currentVersion
+        globalAllowList = try container.decodeIfPresent([AppEntry].self, forKey: .globalAllowList) ?? []
+        modes = try container.decodeIfPresent([ModeConfig].self, forKey: .modes) ?? []
+        enableReapplyShortcut = try container.decodeIfPresent(Bool.self, forKey: .enableReapplyShortcut) ?? false
+        forceCloseApps = try container.decodeIfPresent(Bool.self, forKey: .forceCloseApps) ?? false
+        enableAutoReapply = try container.decodeIfPresent(Bool.self, forKey: .enableAutoReapply) ?? false
+        autoReapplyInterval = try container.decodeIfPresent(Int.self, forKey: .autoReapplyInterval) ?? 15
+        modeSwitcherKey = try container.decodeIfPresent(ModeSwitcherKey.self, forKey: .modeSwitcherKey) ?? .option
+        modeSwitcherShortcut = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .modeSwitcherShortcut)
+        reapplyShortcut = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .reapplyShortcut) ?? .defaultReapply
     }
 
     /// Default configuration for first launch

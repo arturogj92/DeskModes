@@ -119,19 +119,19 @@ final class ModeSelectorOverlay: NSPanel {
             overlay.setFrameOrigin(NSPoint(x: x, y: y))
         }
 
-        // Prepare for animation
+        // Prepare for animation (scale 0.96 -> 1.0, opacity 0 -> 1)
         overlay.alphaValue = 0
         if let layer = overlay.contentView?.layer {
-            layer.transform = CATransform3DMakeScale(0.9, 0.9, 1)
+            layer.transform = CATransform3DMakeScale(0.96, 0.96, 1)
         }
 
         overlay.orderFrontRegardless()
         overlay.makeKey()
 
-        // Animate in
+        // Animate in (140ms ease-out, fast and precise)
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.2
-            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 1, 0.3, 1)
+            context.duration = 0.14
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             overlay.animator().alphaValue = 1
             if let layer = overlay.contentView?.layer {
                 layer.transform = CATransform3DIdentity
@@ -241,13 +241,20 @@ final class ModeSelectorOverlay: NSPanel {
             if index < modeViews.count {
                 if let modeId = modeViews[index].modeId {
                     let item = modeViews[index]
-                    // Flash effect
+
+                    // Subtle glow effect on selection
+                    item.layer?.shadowColor = NSColor.controlAccentColor.cgColor
+                    item.layer?.shadowRadius = 8
+                    item.layer?.shadowOpacity = 0.6
+                    item.layer?.shadowOffset = .zero
+
                     CATransaction.begin()
-                    CATransaction.setAnimationDuration(0.08)
-                    item.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.3).cgColor
+                    CATransaction.setAnimationDuration(0.1)
+                    item.layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.3).cgColor
                     CATransaction.commit()
 
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                    // Select after brief visual feedback (doesn't block input)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
                         self.selectMode(modeId)
                     }
                     return true

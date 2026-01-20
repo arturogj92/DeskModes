@@ -8,6 +8,10 @@ final class SettingsViewController: NSViewController {
     private let splitView = NSSplitView()
     private let sidebarController = ModesSidebarController()
     private let detailController = ModeDetailViewController()
+    private let shortcutsController = ShortcutsViewController()
+    private let advancedController = AdvancedViewController()
+
+    private var currentDetailController: NSViewController?
 
     // MARK: - Lifecycle
 
@@ -54,11 +58,15 @@ final class SettingsViewController: NSViewController {
         sidebarView.translatesAutoresizingMaskIntoConstraints = false
         splitView.addArrangedSubview(sidebarView)
 
-        // Add detail
+        // Add detail container (we'll swap controllers in and out)
         addChild(detailController)
+        addChild(shortcutsController)
+        addChild(advancedController)
+
         let detailView = detailController.view
         detailView.translatesAutoresizingMaskIntoConstraints = false
         splitView.addArrangedSubview(detailView)
+        currentDetailController = detailController
 
         // Set sidebar width constraints
         NSLayoutConstraint.activate([
@@ -70,12 +78,42 @@ final class SettingsViewController: NSViewController {
         splitView.setPosition(180, ofDividerAt: 0)
     }
 
+    private func showDetailController(_ controller: NSViewController) {
+        guard controller !== currentDetailController else { return }
+
+        // Remove current detail view
+        if let current = currentDetailController {
+            current.view.removeFromSuperview()
+        }
+
+        // Add new detail view
+        let newView = controller.view
+        newView.translatesAutoresizingMaskIntoConstraints = false
+        splitView.addArrangedSubview(newView)
+
+        currentDetailController = controller
+    }
+
     private func setupBindings() {
         sidebarController.onModeSelected = { [weak self] mode, isGlobal in
+            guard let self = self else { return }
+            self.showDetailController(self.detailController)
             if isGlobal {
-                self?.detailController.showGlobalAllowList()
+                self.detailController.showGlobalAllowList()
             } else if let mode = mode {
-                self?.detailController.showMode(mode)
+                self.detailController.showMode(mode)
+            }
+        }
+
+        sidebarController.onSettingsSelected = { [weak self] section in
+            guard let self = self else { return }
+            switch section {
+            case "shortcuts":
+                self.showDetailController(self.shortcutsController)
+            case "advanced":
+                self.showDetailController(self.advancedController)
+            default:
+                break
             }
         }
 
@@ -85,13 +123,17 @@ final class SettingsViewController: NSViewController {
         }
 
         sidebarController.onModeAdded = { [weak self] in
+            guard let self = self else { return }
+            // Switch to detail controller first
+            self.showDetailController(self.detailController)
+
             // Select the newly added mode
             let lastIndex = ConfigStore.shared.config.modes.count - 1
-            self?.sidebarController.selectMode(at: lastIndex, isGlobal: false)
+            self.sidebarController.selectMode(at: lastIndex, isGlobal: false)
 
             // Auto-focus name field for immediate renaming
             DispatchQueue.main.async {
-                self?.detailController.focusNameField()
+                self.detailController.focusNameField()
             }
         }
     }

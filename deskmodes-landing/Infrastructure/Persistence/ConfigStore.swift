@@ -134,6 +134,50 @@ final class ConfigStore {
         config = newConfig
     }
 
+    // MARK: - Settings Operations
+
+    func setForceCloseApps(_ enabled: Bool) {
+        var newConfig = config
+        newConfig.forceCloseApps = enabled
+        config = newConfig
+    }
+
+    func setEnableReapplyShortcut(_ enabled: Bool) {
+        var newConfig = config
+        newConfig.enableReapplyShortcut = enabled
+        config = newConfig
+    }
+
+    func setReapplyShortcut(_ shortcut: KeyboardShortcut?) {
+        var newConfig = config
+        newConfig.reapplyShortcut = shortcut
+        config = newConfig
+    }
+
+    func setModeSwitcherKey(_ key: ModeSwitcherKey) {
+        var newConfig = config
+        newConfig.modeSwitcherKey = key
+        config = newConfig
+    }
+
+    func setModeSwitcherShortcut(_ shortcut: KeyboardShortcut?) {
+        var newConfig = config
+        newConfig.modeSwitcherShortcut = shortcut
+        config = newConfig
+    }
+
+    func setEnableAutoReapply(_ enabled: Bool) {
+        var newConfig = config
+        newConfig.enableAutoReapply = enabled
+        config = newConfig
+    }
+
+    func setAutoReapplyInterval(_ minutes: Int) {
+        var newConfig = config
+        newConfig.autoReapplyInterval = minutes
+        config = newConfig
+    }
+
     // MARK: - Private Methods
 
     private func scheduleSave() {
