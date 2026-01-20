@@ -102,7 +102,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Reapply current mode (only if a mode is active)
         if let current = currentMode {
             let reapplyItem = NSMenuItem(
-                title: "Reapply \(current.name) Mode",
+                title: "Reapply Current Mode",
                 action: #selector(reapplyCurrentMode),
                 keyEquivalent: ""
             )

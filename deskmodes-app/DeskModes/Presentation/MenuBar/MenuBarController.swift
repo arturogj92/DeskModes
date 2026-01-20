@@ -331,7 +331,7 @@ final class MenuBarController {
         if !isPaused, let currentId = currentModeId,
            let currentMode = modes.first(where: { $0.id == currentId }) {
             let reapplyItem = NSMenuItem(
-                title: "Reapply \(currentMode.name) Mode",
+                title: "Reapply Current Mode",
                 action: #selector(reapplyCurrentMode),
                 keyEquivalent: "r"
             )
