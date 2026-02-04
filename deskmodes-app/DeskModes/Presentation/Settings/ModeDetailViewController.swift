@@ -43,6 +43,11 @@ final class ModeDetailViewController: NSViewController {
     // Empty state
     private let emptyStateLabel = NSTextField(wrappingLabelWithString: "Add the apps you want automatically available when this mode is active.")
 
+    // Dock management section
+    private let dockSectionLabel = NSTextField(labelWithString: "Dock Configuration")
+    private let dockCheckbox = NSButton(checkboxWithTitle: "Sync Dock with this mode", target: nil, action: nil)
+    private let dockDescriptionLabel = NSTextField(wrappingLabelWithString: "")
+
     // Data
     private var installedApps: [AppEntry] = []
     private var modeApps: [AppEntry] = []  // Single unified list
@@ -286,6 +291,13 @@ final class ModeDetailViewController: NSViewController {
         appsWarningLabel.isHidden = false
         addRunningAppsButton.isHidden = false
 
+        // Configure Dock section
+        dockSectionLabel.isHidden = false
+        dockCheckbox.isHidden = false
+        dockDescriptionLabel.isHidden = false
+        dockCheckbox.state = mode.manageDock ? .on : .off
+        dockDescriptionLabel.stringValue = "When enabled, the Dock will show only this mode's apps + Always Open apps."
+
         // Switch constraints: table below help label
         scrollViewTopToGlobalHeader.isActive = false
         scrollViewTopToHelpLabel.isActive = true
@@ -361,6 +373,11 @@ final class ModeDetailViewController: NSViewController {
         appsWarningLabel.isHidden = true
         emptyStateLabel.isHidden = true
         addRunningAppsButton.isHidden = true
+
+        // Hide Dock section for global view
+        dockSectionLabel.isHidden = true
+        dockCheckbox.isHidden = true
+        dockDescriptionLabel.isHidden = true
 
         // Switch constraints: table below global header
         scrollViewTopToHelpLabel.isActive = false
@@ -454,6 +471,24 @@ final class ModeDetailViewController: NSViewController {
         addRunningAppsButton.translatesAutoresizingMaskIntoConstraints = false
         addRunningAppsButton.font = NSFont.systemFont(ofSize: 11)
         view.addSubview(addRunningAppsButton)
+
+        // Dock section label
+        dockSectionLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        dockSectionLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dockSectionLabel)
+
+        // Dock checkbox
+        dockCheckbox.target = self
+        dockCheckbox.action = #selector(dockCheckboxChanged)
+        dockCheckbox.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dockCheckbox)
+
+        // Dock description label
+        dockDescriptionLabel.font = NSFont.systemFont(ofSize: 11)
+        dockDescriptionLabel.textColor = .secondaryLabelColor
+        dockDescriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        dockDescriptionLabel.preferredMaxLayoutWidth = 280
+        view.addSubview(dockDescriptionLabel)
     }
 
     private func setupGlobalHeader() {
@@ -589,13 +624,26 @@ final class ModeDetailViewController: NSViewController {
             emptyStateLabel.leadingAnchor.constraint(greaterThanOrEqualTo: appsScrollView.leadingAnchor, constant: 20),
             emptyStateLabel.trailingAnchor.constraint(lessThanOrEqualTo: appsScrollView.trailingAnchor, constant: -20),
 
-            // Add app button
+            // Add app button (above dock section)
             addAppButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            addAppButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding),
+            addAppButton.bottomAnchor.constraint(equalTo: dockSectionLabel.topAnchor, constant: -16),
 
             // Add running apps button (next to add app button)
             addRunningAppsButton.leadingAnchor.constraint(equalTo: addAppButton.trailingAnchor, constant: 8),
             addRunningAppsButton.centerYAnchor.constraint(equalTo: addAppButton.centerYAnchor),
+
+            // Dock section label
+            dockSectionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+            dockSectionLabel.bottomAnchor.constraint(equalTo: dockCheckbox.topAnchor, constant: -8),
+
+            // Dock checkbox
+            dockCheckbox.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+            dockCheckbox.bottomAnchor.constraint(equalTo: dockDescriptionLabel.topAnchor, constant: -4),
+
+            // Dock description label
+            dockDescriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding + 18),
+            dockDescriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
+            dockDescriptionLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding),
 
         ])
 
@@ -664,6 +712,12 @@ final class ModeDetailViewController: NSViewController {
         }
 
         popover.show(relativeTo: addRunningAppsButton.bounds, of: addRunningAppsButton, preferredEdge: .maxY)
+    }
+
+    // MARK: - Dock Actions
+
+    @objc private func dockCheckboxChanged() {
+        saveCurrentMode()
     }
 
     /// Add an app with subtle animation feedback
@@ -771,7 +825,8 @@ final class ModeDetailViewController: NSViewController {
                 name: nameField.stringValue,
                 icon: iconName,
                 shortcut: mode.shortcut,
-                apps: modeApps
+                apps: modeApps,
+                manageDock: dockCheckbox.state == .on
             )
             currentMode = mode
             ConfigStore.shared.updateMode(mode)
@@ -823,7 +878,8 @@ extension ModeDetailViewController: NSTextFieldDelegate {
             name: nameField.stringValue,
             icon: iconName,
             shortcut: mode.shortcut,
-            apps: modeApps
+            apps: modeApps,
+            manageDock: dockCheckbox.state == .on
         )
         currentMode = mode
         ConfigStore.shared.updateMode(mode)

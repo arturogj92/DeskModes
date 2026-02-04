@@ -31,18 +31,35 @@ struct ModeConfig: Codable, Equatable, Identifiable {
     var shortcut: String?
     var apps: [AppEntry]  // Single list: apps that should be open in this mode
 
+    // Dock management
+    var manageDock: Bool  // Whether to sync Dock with this mode's apps + Always Open
+
     init(
         id: String = UUID().uuidString,
         name: String,
         icon: String,
         shortcut: String? = nil,
-        apps: [AppEntry] = []
+        apps: [AppEntry] = [],
+        manageDock: Bool = false
     ) {
         self.id = id
         self.name = name
         self.icon = icon
         self.shortcut = shortcut
         self.apps = apps
+        self.manageDock = manageDock
+    }
+
+    // Custom decoding to handle missing keys for backwards compatibility
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        icon = try container.decode(String.self, forKey: .icon)
+        shortcut = try container.decodeIfPresent(String.self, forKey: .shortcut)
+        apps = try container.decodeIfPresent([AppEntry].self, forKey: .apps) ?? []
+        manageDock = try container.decodeIfPresent(Bool.self, forKey: .manageDock) ?? false
+        // Note: dockConfiguration was removed - Dock now syncs automatically with mode apps
     }
 
     /// Convert to domain Mode entity

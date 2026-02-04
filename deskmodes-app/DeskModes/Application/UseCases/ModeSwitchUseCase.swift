@@ -119,7 +119,10 @@ final class ModeSwitchUseCase: ModeSwitching {
             }
         }
 
-        // Step 5: Log summary
+        // Step 5: Apply Dock configuration if enabled
+        applyDockConfiguration(for: mode)
+
+        // Step 6: Log summary
         logSummary(mode: mode, closed: closedApps, skipped: skippedApps, opened: openedApps, failed: failedToOpen)
 
         // Update current mode
@@ -135,6 +138,48 @@ final class ModeSwitchUseCase: ModeSwitching {
             failedToOpen: failedToOpen,
             success: failedToOpen.isEmpty
         )
+    }
+
+    // MARK: - Dock Management
+
+    private func applyDockConfiguration(for mode: Mode) {
+        // Get the mode config to check Dock settings
+        guard let modeConfig = ConfigStore.shared.config.modes.first(where: { $0.id == mode.id }) else {
+            logger.debug("Mode config not found for Dock check: \(mode.name)")
+            return
+        }
+
+        // Check if Dock management is enabled for this mode
+        guard modeConfig.manageDock else {
+            logger.debug("Dock management disabled for mode: \(mode.name)")
+            return
+        }
+
+        // Build the Dock apps list: mode apps + Always Open apps
+        var dockApps: [AppIdentifier] = []
+
+        // Add Always Open apps first (they appear on the left side of Dock)
+        for app in modeManager.globalAllowList.apps {
+            dockApps.append(app)
+        }
+
+        // Add mode apps (excluding duplicates from Always Open)
+        for app in mode.apps {
+            if !dockApps.contains(where: { $0.bundleId == app.bundleId }) {
+                dockApps.append(app)
+            }
+        }
+
+        logger.info("Setting Dock for mode '\(mode.name)' with \(dockApps.count) apps")
+
+        // Apply the dynamic Dock configuration
+        let success = DockManager.shared.setDockApps(dockApps)
+
+        if success {
+            logger.info("Dock updated successfully for mode: \(mode.name)")
+        } else {
+            logger.error("Failed to update Dock for mode: \(mode.name)")
+        }
     }
 
     // MARK: - Logging

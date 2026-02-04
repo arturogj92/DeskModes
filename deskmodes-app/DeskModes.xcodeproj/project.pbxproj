@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		DMSPK001 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DMSPK002 /* Sparkle.framework */; };
 		DMSPK003 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DMSPK002 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DMDCK001 /* DockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DMDCK002 /* DockManager.swift */; };
 		DM001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM002 /* AppDelegate.swift */; };
 		DM122 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM123 /* main.swift */; };
 		DM100 /* AppIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM101 /* AppIdentifier.swift */; };
@@ -43,6 +44,7 @@
 
 /* Begin PBXFileReference section */
 		DMSPK002 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
+		DMDCK002 /* DockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockManager.swift; sourceTree = "<group>"; };
 		DM002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DM123 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DM003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 				DM113 /* AppLister.swift */,
 				DM115 /* AppCloser.swift */,
 				DM117 /* AppLauncher.swift */,
+				DMDCK002 /* DockManager.swift */,
 			);
 			path = Adapters;
 			sourceTree = "<group>";
@@ -372,6 +375,7 @@
 				DM112 /* AppLister.swift in Sources */,
 				DM114 /* AppCloser.swift in Sources */,
 				DM116 /* AppLauncher.swift in Sources */,
+				DMDCK001 /* DockManager.swift in Sources */,
 				DM118 /* Logger.swift in Sources */,
 				DM120 /* MenuBarController.swift in Sources */,
 				DM300 /* Config.swift in Sources */,
