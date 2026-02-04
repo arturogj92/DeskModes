@@ -5,6 +5,7 @@ DerivedData/
 *.xccheckout
 *.xcscmblueprint
 xcuserdata/
+*.xcarchive
 
 # Swift Package Manager
 .build/
@@ -18,3 +19,47 @@ Package.resolved
 
 # App specific
 *.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Release artifacts
+*.dmg
+*.zip
+*.pkg
+
+# Signing keys (never commit!)
+*.p12
+*.pem
+*.cer
+private_keys/
+
+# Sparkle
+dsa_priv.pem
+eddsa_private_key
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# Node.js
+node_modules/
+.next/
+out/
+dist/
+
+# Test/alternative landing pages (not part of main project)
+claude_landing/
+deskmodes-landing/codex_/
+deskmodes-landing/gemini_landing/
+
+# Video project (separate)
+deskmodes-video/

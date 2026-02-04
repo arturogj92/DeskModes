@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DMSPK001 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DMSPK002 /* Sparkle.framework */; };
+		DMSPK003 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DMSPK002 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DM001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM002 /* AppDelegate.swift */; };
 		DM122 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM123 /* main.swift */; };
 		DM100 /* AppIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DM101 /* AppIdentifier.swift */; };
@@ -40,6 +42,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DMSPK002 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		DM002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DM123 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DM003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -75,21 +78,45 @@
 		DMH002 /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		DMSPK004 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DMSPK003 /* Sparkle.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		DM006 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DMSPK001 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DMSPK005 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DMSPK002 /* Sparkle.framework */,
+			);
+			path = Frameworks;
+			sourceTree = "<group>";
+		};
 		DM007 = {
 			isa = PBXGroup;
 			children = (
 				DM008 /* DeskModes */,
+				DMSPK005 /* Frameworks */,
 				DM009 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -271,6 +298,7 @@
 				DM012 /* Sources */,
 				DM006 /* Frameworks */,
 				DM013 /* Resources */,
+				DMSPK004 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -487,11 +515,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DeskModes/DeskModes.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = ZC8MCRVRBP;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DeskModes/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DeskModes;
@@ -516,11 +548,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DeskModes/DeskModes.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = ZC8MCRVRBP;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DeskModes/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DeskModes;

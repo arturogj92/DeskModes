@@ -28,5 +28,13 @@
 	<string>Copyright 2026 art0xdev. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/arturogj92/DeskModes/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>yNzQDfxzRZVp+xPFeK/LbrO2oVANhPXiGpRoq9bmWi8=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
 </dict>
 </plist>

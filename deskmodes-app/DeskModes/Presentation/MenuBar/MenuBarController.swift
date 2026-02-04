@@ -1,4 +1,5 @@
 import Cocoa
+import Sparkle
 
 /// Controls the menu bar status item and mode selection.
 final class MenuBarController {
@@ -356,6 +357,13 @@ final class MenuBarController {
         let prefsItem = NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: ",")
         prefsItem.target = self
         menu.addItem(prefsItem)
+
+        // Check for Updates
+        let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
+        if let appDelegate = NSApp.delegate as? AppDelegate {
+            updateItem.target = appDelegate.updaterController
+        }
+        menu.addItem(updateItem)
 
         menu.addItem(NSMenuItem.separator())
 

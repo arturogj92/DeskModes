@@ -10,11 +10,13 @@ final class ShortcutsViewController: NSViewController {
     private let switcherKeyPopup = NSPopUpButton()
     private let switcherOrLabel = NSTextField(labelWithString: "or")
     private let switcherShortcutRecorder = ShortcutRecorderButton()
+    private let switcherClearButton = NSButton()
     private let switcherHelpLabel = NSTextField(wrappingLabelWithString: "")
 
     // Reapply section
     private let reapplyShortcutLabel = NSTextField(labelWithString: "Reapply shortcut")
     private let reapplyShortcutRecorder = ShortcutRecorderButton()
+    private let reapplyClearButton = NSButton()
     private let reapplyHelpLabel = NSTextField(wrappingLabelWithString: "")
 
     // Auto-reapply section
@@ -75,8 +77,27 @@ final class ShortcutsViewController: NSViewController {
         switcherShortcutRecorder.translatesAutoresizingMaskIntoConstraints = false
         switcherShortcutRecorder.onShortcutChanged = { [weak self] shortcut in
             ConfigStore.shared.setModeSwitcherShortcut(shortcut)
+            // If custom shortcut is set, disable double-tap (right takes precedence)
+            if shortcut != nil {
+                ConfigStore.shared.setModeSwitcherKey(.disabled)
+                self?.switcherKeyPopup.selectItem(at: self?.switcherKeyPopup.itemArray.firstIndex(where: {
+                    ($0.representedObject as? ModeSwitcherKey) == .disabled
+                }) ?? 0)
+            }
+            self?.updateClearButtonVisibility()
         }
         view.addSubview(switcherShortcutRecorder)
+
+        // Clear button for mode switcher shortcut
+        switcherClearButton.bezelStyle = .inline
+        switcherClearButton.isBordered = false
+        switcherClearButton.image = NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: "Clear shortcut")
+        switcherClearButton.imageScaling = .scaleProportionallyDown
+        switcherClearButton.contentTintColor = .tertiaryLabelColor
+        switcherClearButton.target = self
+        switcherClearButton.action = #selector(clearSwitcherShortcut)
+        switcherClearButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(switcherClearButton)
 
         switcherHelpLabel.stringValue = "Press 1-9 while open to quick-switch modes."
         switcherHelpLabel.font = NSFont.systemFont(ofSize: 11)
@@ -105,8 +126,20 @@ final class ShortcutsViewController: NSViewController {
         reapplyShortcutRecorder.translatesAutoresizingMaskIntoConstraints = false
         reapplyShortcutRecorder.onShortcutChanged = { [weak self] shortcut in
             ConfigStore.shared.setReapplyShortcut(shortcut)
+            self?.updateClearButtonVisibility()
         }
         view.addSubview(reapplyShortcutRecorder)
+
+        // Clear button for reapply shortcut
+        reapplyClearButton.bezelStyle = .inline
+        reapplyClearButton.isBordered = false
+        reapplyClearButton.image = NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: "Clear shortcut")
+        reapplyClearButton.imageScaling = .scaleProportionallyDown
+        reapplyClearButton.contentTintColor = .tertiaryLabelColor
+        reapplyClearButton.target = self
+        reapplyClearButton.action = #selector(clearReapplyShortcut)
+        reapplyClearButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(reapplyClearButton)
 
         reapplyHelpLabel.stringValue = "Re-closes unwanted apps and reopens mode apps."
         reapplyHelpLabel.font = NSFont.systemFont(ofSize: 11)
@@ -162,6 +195,11 @@ final class ShortcutsViewController: NSViewController {
             switcherShortcutRecorder.leadingAnchor.constraint(equalTo: switcherOrLabel.trailingAnchor, constant: 8),
             switcherShortcutRecorder.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
 
+            switcherClearButton.centerYAnchor.constraint(equalTo: switcherShortcutRecorder.centerYAnchor),
+            switcherClearButton.leadingAnchor.constraint(equalTo: switcherShortcutRecorder.trailingAnchor, constant: 4),
+            switcherClearButton.widthAnchor.constraint(equalToConstant: 16),
+            switcherClearButton.heightAnchor.constraint(equalToConstant: 16),
+
             switcherHelpLabel.topAnchor.constraint(equalTo: switcherOpenLabel.bottomAnchor, constant: 6),
             switcherHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
             switcherHelpLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
@@ -182,6 +220,11 @@ final class ShortcutsViewController: NSViewController {
             reapplyShortcutRecorder.centerYAnchor.constraint(equalTo: reapplyShortcutLabel.centerYAnchor),
             reapplyShortcutRecorder.leadingAnchor.constraint(equalTo: reapplyShortcutLabel.trailingAnchor, constant: 8),
             reapplyShortcutRecorder.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
+
+            reapplyClearButton.centerYAnchor.constraint(equalTo: reapplyShortcutRecorder.centerYAnchor),
+            reapplyClearButton.leadingAnchor.constraint(equalTo: reapplyShortcutRecorder.trailingAnchor, constant: 4),
+            reapplyClearButton.widthAnchor.constraint(equalToConstant: 16),
+            reapplyClearButton.heightAnchor.constraint(equalToConstant: 16),
 
             reapplyHelpLabel.topAnchor.constraint(equalTo: reapplyShortcutLabel.bottomAnchor, constant: 6),
             reapplyHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
@@ -235,6 +278,13 @@ final class ShortcutsViewController: NSViewController {
         let autoEnabled = autoReapplyCheckbox.state == .on
         autoReapplyIntervalPopup.isEnabled = autoEnabled
         autoReapplyHelpLabel.textColor = autoEnabled ? .tertiaryLabelColor : .quaternaryLabelColor
+        updateClearButtonVisibility()
+    }
+
+    private func updateClearButtonVisibility() {
+        // Show clear button only if shortcut is set
+        switcherClearButton.isHidden = switcherShortcutRecorder.getShortcut() == nil
+        reapplyClearButton.isHidden = reapplyShortcutRecorder.getShortcut() == nil
     }
 
     // MARK: - Actions
@@ -252,5 +302,17 @@ final class ShortcutsViewController: NSViewController {
     @objc private func autoReapplyIntervalChanged() {
         guard let interval = autoReapplyIntervalPopup.selectedItem?.representedObject as? Int else { return }
         ConfigStore.shared.setAutoReapplyInterval(interval)
+    }
+
+    @objc private func clearSwitcherShortcut() {
+        switcherShortcutRecorder.setShortcut(nil)
+        ConfigStore.shared.setModeSwitcherShortcut(nil)
+        updateClearButtonVisibility()
+    }
+
+    @objc private func clearReapplyShortcut() {
+        reapplyShortcutRecorder.setShortcut(nil)
+        ConfigStore.shared.setReapplyShortcut(nil)
+        updateClearButtonVisibility()
     }
 }
