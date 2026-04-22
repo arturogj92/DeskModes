@@ -57,7 +57,6 @@ out/
 dist/
 
 # Test/alternative landing pages (not part of main project)
-claude_landing/
 deskmodes-landing/codex_/
 deskmodes-landing/gemini_landing/
 
